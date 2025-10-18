@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register morph map for polymorphic relationships
+        \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
+            'course' => \App\Models\Course::class,
+            'lesson' => \App\Models\Lesson::class,
+        ]);
     }
 }

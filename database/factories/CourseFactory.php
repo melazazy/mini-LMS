@@ -56,7 +56,7 @@ class CourseFactory extends Factory
     public function free(): static
     {
         return $this->state(fn (array $attributes) => [
-            'price' => 0,
+            'price' => null,
         ]);
     }
 }
