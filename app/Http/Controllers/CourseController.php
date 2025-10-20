@@ -9,13 +9,32 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::where('is_published', true)->get();
-        return view('courses.index', compact('courses'));
+        return view('courses.index');
     }
 
     public function show(Course $course)
     {
+        // Ensure course is published or user is the creator/admin
+        if (!$course->is_published && !auth()->user()?->isAdmin() && $course->created_by !== auth()->id()) {
+            abort(404);
+        }
+        
         return view('courses.show', compact('course'));
+    }
+    
+    public function watch(Course $course, $lessonId = null)
+    {
+        // Ensure course is published
+        if (!$course->is_published) {
+            abort(404);
+        }
+        
+        $lesson = null;
+        if ($lessonId) {
+            $lesson = $course->lessons()->findOrFail($lessonId);
+        }
+        
+        return view('courses.watch', compact('course', 'lesson'));
     }
 
     public function enroll(Course $course)

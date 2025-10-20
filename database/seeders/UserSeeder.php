@@ -12,45 +12,77 @@ class UserSeeder extends Seeder
     {
         // Create admin user
         User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
+            'name' => 'Sarah Admin',
+            'email' => 'admin@minilms.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
-            'email_verified_at' => now(),
+            'email_verified_at' => now()->subDays(90),
         ]);
 
         // Create instructor users
         User::create([
-            'name' => 'John Instructor',
-            'email' => 'instructor@example.com',
+            'name' => 'Dr. Michael Chen',
+            'email' => 'michael.chen@minilms.com',
             'password' => Hash::make('password'),
             'role' => 'instructor',
-            'email_verified_at' => now(),
+            'email_verified_at' => now()->subDays(60),
         ]);
 
         User::create([
-            'name' => 'Jane Instructor',
-            'email' => 'jane@example.com',
+            'name' => 'Prof. Emily Rodriguez',
+            'email' => 'emily.rodriguez@minilms.com',
             'password' => Hash::make('password'),
             'role' => 'instructor',
-            'email_verified_at' => now(),
+            'email_verified_at' => now()->subDays(75),
+        ]);
+
+        User::create([
+            'name' => 'David Thompson',
+            'email' => 'david.thompson@minilms.com',
+            'password' => Hash::make('password'),
+            'role' => 'instructor',
+            'email_verified_at' => now()->subDays(45),
         ]);
 
         // Create student users
         User::create([
-            'name' => 'Student One',
-            'email' => 'student1@example.com',
+            'name' => 'Alex Johnson',
+            'email' => 'alex.johnson@student.com',
             'password' => Hash::make('password'),
             'role' => 'student',
-            'email_verified_at' => now(),
+            'email_verified_at' => now()->subDays(30),
         ]);
 
         User::create([
-            'name' => 'Student Two',
-            'email' => 'student2@example.com',
+            'name' => 'Maria Garcia',
+            'email' => 'maria.garcia@student.com',
             'password' => Hash::make('password'),
             'role' => 'student',
-            'email_verified_at' => now(),
+            'email_verified_at' => now()->subDays(25),
+        ]);
+
+        User::create([
+            'name' => 'James Wilson',
+            'email' => 'james.wilson@student.com',
+            'password' => Hash::make('password'),
+            'role' => 'student',
+            'email_verified_at' => now()->subDays(20),
+        ]);
+
+        User::create([
+            'name' => 'Sophie Anderson',
+            'email' => 'sophie.anderson@student.com',
+            'password' => Hash::make('password'),
+            'role' => 'student',
+            'email_verified_at' => now()->subDays(15),
+        ]);
+
+        User::create([
+            'name' => 'Ryan Patel',
+            'email' => 'ryan.patel@student.com',
+            'password' => Hash::make('password'),
+            'role' => 'student',
+            'email_verified_at' => now()->subDays(10),
         ]);
     }
 }

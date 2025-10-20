@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/', [CourseController::class, 'index'])->name('home');
+Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+Route::get('/courses/{course}/watch/{lesson?}', [CourseController::class, 'watch'])->name('courses.watch');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
@@ -29,11 +32,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Course routes
-    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-    Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll')
-        ->middleware('role:student');
+    // Course enrollment
+    Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');
     
     // Lesson routes
     Route::get('/courses/{course}/lessons/{lesson}', [LessonController::class, 'show'])->name('lessons.show');

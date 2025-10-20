@@ -1,5 +1,7 @@
 import './bootstrap.js';
-import Alpine from 'alpinejs';
+import Plyr from 'plyr';
 
-window.Alpine = Alpine;
-Alpine.start();
+// Don't import Alpine - Livewire provides it
+// This prevents "multiple instances of Alpine" warning
+
+window.Plyr = Plyr;
