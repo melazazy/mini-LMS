@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CreateCourseAction
 {
@@ -18,6 +19,7 @@ class CreateCourseAction
         return DB::transaction(function () use ($user, $courseData) {
             $course = Course::create([
                 'title' => $courseData['title'],
+                'slug' => $courseData['slug'] ?? Str::slug($courseData['title']),
                 'description' => $courseData['description'],
                 'level' => $courseData['level'],
                 'price' => $courseData['price'] ?? null,

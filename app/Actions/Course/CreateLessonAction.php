@@ -7,6 +7,7 @@ use App\Models\Lesson;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CreateLessonAction
 {
@@ -23,6 +24,7 @@ class CreateLessonAction
             $lesson = Lesson::create([
                 'course_id' => $course->id,
                 'title' => $lessonData['title'],
+                'slug' => $lessonData['slug'] ?? Str::slug($lessonData['title']),
                 'video_url' => $lessonData['video_url'] ?? null,
                 'hls_manifest_url' => $lessonData['hls_manifest_url'] ?? null,
                 'duration_seconds' => $lessonData['duration_seconds'] ?? 0,

@@ -4,14 +4,17 @@ namespace App\Events;
 
 use App\Models\Course;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
+use App\Notifications\CourseCompletionNotification;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Event fired when a user completes a course.
+ * Broadcasts to the user's private channel and sends notification.
+ */
 class CourseCompleted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
@@ -19,23 +22,47 @@ class CourseCompleted implements ShouldBroadcast
     public User $user;
     public Course $course;
 
+    /**
+     * Create a new event instance.
+     */
     public function __construct(User $user, Course $course)
     {
         $this->user = $user;
         $this->course = $course;
+        
+        // Send notification asynchronously
+        $user->notify(new CourseCompletionNotification($course));
     }
 
-    public function broadcastOn()
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\PrivateChannel
+     */
+    public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel('user.' . $this->user->id);
     }
 
-    public function broadcastWith()
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
     {
         return [
             'course_id' => $this->course->id,
             'course_title' => $this->course->title,
             'completed_at' => now()->toISOString(),
         ];
+    }
+
+    /**
+     * The event's broadcast name.
+     */
+    public function broadcastAs(): string
+    {
+        return 'course.completed';
     }
 }

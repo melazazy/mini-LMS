@@ -10,6 +10,7 @@ use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class ProgressActionTest extends TestCase
@@ -84,6 +85,8 @@ class ProgressActionTest extends TestCase
 
     public function test_lesson_completion_triggers_course_completion()
     {
+        Event::fake();
+        
         $user = User::factory()->create(['role' => 'student']);
         $course = Course::factory()->create(['is_published' => true]);
         

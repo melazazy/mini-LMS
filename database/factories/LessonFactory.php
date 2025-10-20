@@ -20,8 +20,11 @@ class LessonFactory extends Factory
      */
     public function definition(): array
     {
+        $title = $this->faker->sentence(3);
+        
         return [
-            'title' => $this->faker->sentence(3),
+            'title' => $title,
+            'slug' => \Illuminate\Support\Str::slug($title),
             'video_url' => $this->faker->url(),
             'duration_seconds' => $this->faker->numberBetween(60, 3600), // 1 minute to 1 hour
             'order' => $this->faker->numberBetween(1, 10),

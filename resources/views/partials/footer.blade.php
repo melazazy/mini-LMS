@@ -8,12 +8,12 @@
             </div>
 
             <!-- Links -->
-            <div class="flex items-center space-x-6 text-sm">
+            {{-- <div class="flex items-center space-x-6 text-sm">
                 <a href="#" class="text-gray-600 hover:text-indigo-600 transition">About</a>
                 <a href="#" class="text-gray-600 hover:text-indigo-600 transition">Privacy</a>
                 <a href="#" class="text-gray-600 hover:text-indigo-600 transition">Terms</a>
                 <a href="#" class="text-gray-600 hover:text-indigo-600 transition">Contact</a>
-            </div>
+            </div> --}}
 
             <!-- Tech Stack Badge -->
             <div class="text-xs text-gray-500">

@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InstructorDashboardController;
+use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +33,10 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Role-specific dashboards
+    Route::get('/instructor/dashboard', [InstructorDashboardController::class, 'index'])->name('instructor.dashboard');
+    Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     
     // Course enrollment
     Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');

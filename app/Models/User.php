@@ -98,6 +98,21 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    /**
+     * Route notifications for the WebPush channel.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function routeNotificationForWebPush()
+    {
+        return $this->pushSubscriptions;
+    }
+
     // Scopes
     public function scopeStudents($query)
     {

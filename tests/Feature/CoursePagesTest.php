@@ -234,6 +234,13 @@ class CoursePagesTest extends TestCase
     public function test_course_show_displays_preview_button()
     {
         $course = Course::factory()->create(['is_published' => true]);
+        
+        // Create a published lesson so the preview button appears
+        \App\Models\Lesson::factory()->create([
+            'course_id' => $course->id,
+            'is_published' => true,
+            'order' => 1,
+        ]);
 
         $response = $this->get(route('courses.show', $course));
 

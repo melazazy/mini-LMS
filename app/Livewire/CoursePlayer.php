@@ -150,6 +150,10 @@ class CoursePlayer extends Component
 
     public function hasPreviousLesson()
     {
+        if (!$this->currentLesson || $this->currentLesson->order === null) {
+            return false;
+        }
+        
         return $this->course->publishedLessons()
             ->where('order', '<', $this->currentLesson->order)
             ->exists();
@@ -157,6 +161,10 @@ class CoursePlayer extends Component
 
     public function hasNextLesson()
     {
+        if (!$this->currentLesson || $this->currentLesson->order === null) {
+            return false;
+        }
+        
         return $this->course->publishedLessons()
             ->where('order', '>', $this->currentLesson->order)
             ->exists();

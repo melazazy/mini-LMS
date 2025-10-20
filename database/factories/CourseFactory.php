@@ -20,8 +20,11 @@ class CourseFactory extends Factory
      */
     public function definition(): array
     {
+        $title = $this->faker->sentence(3);
+        
         return [
-            'title' => $this->faker->sentence(3),
+            'title' => $title,
+            'slug' => \Illuminate\Support\Str::slug($title),
             'description' => $this->faker->paragraph(),
             'level' => $this->faker->randomElement(['beginner', 'intermediate', 'advanced']),
             'price' => $this->faker->randomFloat(2, 0, 100),

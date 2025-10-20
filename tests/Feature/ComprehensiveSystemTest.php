@@ -22,6 +22,7 @@ use App\Models\ModerationReview;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class ComprehensiveSystemTest extends TestCase
@@ -403,6 +404,8 @@ class ComprehensiveSystemTest extends TestCase
 
     public function test_step_4_update_lesson_progress_action(): void
     {
+        Event::fake();
+        
         $student = User::factory()->create(['role' => 'student']);
         $course = Course::factory()->create(['is_published' => true]);
         $lesson = Lesson::factory()->create([
@@ -428,6 +431,8 @@ class ComprehensiveSystemTest extends TestCase
 
     public function test_step_4_lesson_completion_triggers_at_90_percent(): void
     {
+        Event::fake();
+        
         $student = User::factory()->create(['role' => 'student']);
         $course = Course::factory()->create(['is_published' => true]);
         $lesson = Lesson::factory()->create([
@@ -613,6 +618,8 @@ class ComprehensiveSystemTest extends TestCase
      */
     public function test_complete_user_journey_from_registration_to_course_completion(): void
     {
+        Event::fake();
+        
         // 1. Create instructor and course
         $instructor = User::factory()->create(['role' => 'instructor']);
         $createCourseAction = app(CreateCourseAction::class);

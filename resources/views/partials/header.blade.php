@@ -56,12 +56,12 @@
                                 </a>
                             @endif
                             
-                            @if(auth()->user()->role === 'instructor')
+                            {{-- @if(auth()->user()->role === 'instructor')
                                 <a href="/admin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
                                     Instructor Dashboard
                                 </a>
                             @endif
-                            
+                             --}}
                             <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
                                 Dashboard
                             </a>
