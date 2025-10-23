@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Course extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -30,13 +31,48 @@ class Course extends Model
         'price' => 'decimal:2',
     ];
 
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     protected static function boot()
     {
         parent::boot();
         
         static::creating(function ($course) {
             if (empty($course->slug)) {
-                $course->slug = Str::slug($course->title);
+                $baseSlug = Str::slug($course->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                
+                // Check including soft deleted records to ensure uniqueness
+                while (static::withTrashed()->where('slug', $slug)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                
+                $course->slug = $slug;
+            }
+        });
+        
+        // When restoring a soft-deleted course, ensure slug is still unique
+        static::restoring(function ($course) {
+            // Get the base slug (remove any numeric suffix)
+            $baseSlug = preg_replace('/-\d+$/', '', $course->slug);
+            $slug = $course->slug;
+            $counter = 1;
+            
+            // Check if current slug is taken by another non-deleted course
+            if (static::where('slug', $slug)->where('id', '!=', $course->id)->exists()) {
+                // Find next available slug
+                $slug = $baseSlug;
+                while (static::where('slug', $slug)->where('id', '!=', $course->id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                $course->slug = $slug;
             }
         });
     }

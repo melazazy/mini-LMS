@@ -33,13 +33,21 @@ class UpdateLessonProgressAction
             
             $wasAlreadyCompleted = $existingProgress && $existingProgress->watched_percentage >= 90;
             
+            // Determine the percentage to save
+            // If lesson is already completed, don't reduce the percentage
+            $percentageToSave = $watchedPercentage;
+            if ($existingProgress && $existingProgress->watched_percentage >= 90) {
+                // Keep the higher percentage (don't let it go down from 100%)
+                $percentageToSave = max($existingProgress->watched_percentage, $watchedPercentage);
+            }
+            
             $progress = LessonProgress::updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'lesson_id' => $lesson->id,
                 ],
                 [
-                    'watched_percentage' => $watchedPercentage,
+                    'watched_percentage' => $percentageToSave,
                     'last_position_seconds' => $lastPositionSeconds,
                     'last_watched_at' => now(),
                 ]
@@ -53,8 +61,9 @@ class UpdateLessonProgressAction
             Log::debug('Lesson progress updated', [
                 'user_id' => $user->id,
                 'lesson_id' => $lesson->id,
-                'percentage' => $watchedPercentage,
+                'percentage' => $percentageToSave,
                 'position' => $lastPositionSeconds,
+                'was_completed' => $wasAlreadyCompleted,
             ]);
 
             return $progress;

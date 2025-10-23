@@ -4,7 +4,6 @@ namespace App\Events;
 
 use App\Models\Course;
 use App\Models\User;
-use App\Notifications\CourseCompletionNotification;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -13,7 +12,8 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Event fired when a user completes a course.
- * Broadcasts to the user's private channel and sends notification.
+ * Broadcasts to the user's private channel.
+ * Notification is sent by SendCourseCompletionNotification listener.
  */
 class CourseCompleted implements ShouldBroadcast
 {
@@ -29,9 +29,6 @@ class CourseCompleted implements ShouldBroadcast
     {
         $this->user = $user;
         $this->course = $course;
-        
-        // Send notification asynchronously
-        $user->notify(new CourseCompletionNotification($course));
     }
 
     /**

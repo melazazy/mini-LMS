@@ -13,6 +13,11 @@ class ListLessons extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('reorder')
+                ->label('Reorder Lessons')
+                ->icon('heroicon-o-arrows-up-down')
+                ->url(route('filament.admin.resources.lessons.reorder'))
+                ->color('gray'),
             Actions\CreateAction::make(),
         ];
     }

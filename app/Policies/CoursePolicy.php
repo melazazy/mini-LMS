@@ -44,8 +44,44 @@ class CoursePolicy
 
     public function enroll(User $user, Course $course)
     {
-        // Students can enroll in published courses
-        return $user->isStudent() && $course->is_published;
+        // Students can enroll in published, non-deleted courses
+        return $user->isStudent() && $course->is_published && !$course->trashed();
+    }
+    
+    /**
+     * Determine whether the user can view trashed courses.
+     */
+    public function viewTrashed(User $user, Course $course)
+    {
+        // Only admins and course creators can view trashed courses
+        return $user->isAdmin() || $course->created_by === $user->id;
+    }
+    
+    /**
+     * Determine whether the user can view unpublished courses.
+     */
+    public function viewUnpublished(User $user, Course $course)
+    {
+        // Only admins and course creators can view unpublished courses
+        return $user->isAdmin() || $course->created_by === $user->id;
+    }
+    
+    /**
+     * Determine whether the user can restore the course.
+     */
+    public function restore(User $user, Course $course)
+    {
+        // Only admins and course creators can restore courses
+        return $user->isAdmin() || $course->created_by === $user->id;
+    }
+    
+    /**
+     * Determine whether the user can permanently delete the course.
+     */
+    public function forceDelete(User $user, Course $course)
+    {
+        // Only admins can force delete courses
+        return $user->isAdmin();
     }
 
     public function manage(User $user, Course $course)

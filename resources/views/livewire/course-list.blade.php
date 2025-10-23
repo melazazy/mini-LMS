@@ -5,18 +5,18 @@
             <!-- Search -->
             <div class="flex-1">
                 <input
-                    wire:model.debounce.300ms="search"
+                    wire:model.live.debounce.300ms="search"
                     type="text"
                     placeholder="Search courses..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
             </div>
 
             <!-- Level Filter -->
             <div class="sm:w-48">
                 <select
-                    wire:model="level"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    wire:model.live="level"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                     <option value="">All Levels</option>
                     <option value="beginner">Beginner</option>
@@ -28,8 +28,8 @@
             <!-- Sort -->
             <div class="sm:w-48">
                 <select
-                    wire:model="sortBy"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    wire:model.live="sortBy"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                     <option value="created_at">Newest</option>
                     <option value="title">Title</option>
@@ -43,7 +43,7 @@
     <!-- Courses Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($courses as $course)
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
                 <!-- Course Thumbnail -->
                 <div class="relative">
                     <img
@@ -75,16 +75,16 @@
                         </span>
                     </div>
 
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                         {{ $course->title }}
                     </h3>
 
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
                         {{ $course->description }}
                     </p>
 
                     <div class="flex items-center justify-between">
-                        <div class="text-lg font-bold text-gray-900">
+                        <div class="text-lg font-bold text-gray-900 dark:text-white">
                             {{ $course->formatted_price }}
                         </div>
 
@@ -102,8 +102,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
-                <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No courses found</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria.</p>
             </div>
         @endforelse
     </div>

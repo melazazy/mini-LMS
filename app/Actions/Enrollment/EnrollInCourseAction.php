@@ -2,6 +2,7 @@
 
 namespace App\Actions\Enrollment;
 
+use App\Events\EnrollmentCreated;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\User;
@@ -37,6 +38,9 @@ class EnrollInCourseAction
                 'course_id' => $course->id,
                 'enrollment_id' => $enrollment->id,
             ]);
+
+            // Dispatch event for notifications (queued, async)
+            EnrollmentCreated::dispatch($enrollment);
 
             return $enrollment;
         });

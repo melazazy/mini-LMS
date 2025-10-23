@@ -17,8 +17,21 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    
+    <script>
+        // Prevent flash of unstyled content
+        if (localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <div class="min-h-screen flex flex-col">
         @include('partials.header')
 
@@ -34,6 +47,38 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     
     @livewireScripts
+    
+    <!-- Dark Mode Alpine.js Component -->
+    <script>
+        document.addEventListener('livewire:init', () => {
+            // Initialize dark mode after Livewire/Alpine loads
+            Alpine.data('darkMode', () => ({
+                darkMode: localStorage.getItem('darkMode') === 'true',
+                
+                init() {
+                    // Watch for changes and save to localStorage
+                    this.$watch('darkMode', value => {
+                        localStorage.setItem('darkMode', value);
+                        if (value) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                    });
+                    
+                    // Apply initial state
+                    if (this.darkMode) {
+                        document.documentElement.classList.add('dark');
+                    }
+                },
+                
+                toggle() {
+                    this.darkMode = !this.darkMode;
+                }
+            }));
+        });
+    </script>
+    
     @stack('scripts')
 </body>
 </html>

@@ -2,6 +2,13 @@
 
 namespace App\Providers;
 
+use App\Events\CourseCompleted;
+use App\Events\EnrollmentCreated;
+use App\Listeners\SendCourseCompletionNotification;
+use App\Listeners\SendEnrollmentNotification;
+use App\Listeners\SendWelcomeNotification;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,5 +31,21 @@ class AppServiceProvider extends ServiceProvider
             'course' => \App\Models\Course::class,
             'lesson' => \App\Models\Lesson::class,
         ]);
+
+        // Register event listeners
+        Event::listen(
+            Registered::class,
+            SendWelcomeNotification::class,
+        );
+
+        Event::listen(
+            EnrollmentCreated::class,
+            SendEnrollmentNotification::class,
+        );
+
+        Event::listen(
+            CourseCompleted::class,
+            SendCourseCompletionNotification::class,
+        );
     }
 }

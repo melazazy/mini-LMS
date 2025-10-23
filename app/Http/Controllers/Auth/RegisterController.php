@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,9 @@ class RegisterController extends Controller
             'role' => $request->role,
             'email_verified_at' => now(),
         ]);
+
+        // Dispatch Registered event to trigger welcome email
+        event(new Registered($user));
 
         Auth::login($user);
 

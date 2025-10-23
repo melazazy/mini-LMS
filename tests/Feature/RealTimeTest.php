@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\CourseCompletionNotification;
 use App\Notifications\CourseUpdateNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -97,7 +98,9 @@ class RealTimeTest extends TestCase
      */
     public function test_course_completed_event_sends_notification(): void
     {
-        Event::fake();
+        // Only fake broadcasting, not the entire event system
+        // This allows listeners to run while preventing actual broadcasts
+        Bus::fake();
         Notification::fake();
 
         $user = User::factory()->create();

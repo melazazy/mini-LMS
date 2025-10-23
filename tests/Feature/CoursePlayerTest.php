@@ -63,7 +63,10 @@ class CoursePlayerTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test('course-player', ['course' => $course])
+        // Refresh course to load relationships
+        $course->refresh();
+
+        Livewire::test('course-player', ['course' => $course, 'lesson' => $lesson])
             ->assertSet('canWatchLesson', true)
             ->assertSee($lesson->title);
     }

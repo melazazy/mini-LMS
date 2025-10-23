@@ -40,21 +40,43 @@ class EnrollmentsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('id')
+            ->recordTitleAttribute('course.title')
             ->columns([
                 Tables\Columns\TextColumn::make('course.title')
+                    ->label('Course')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(50),
+                Tables\Columns\BadgeColumn::make('course.level')
+                    ->label('Level')
+                    ->colors([
+                        'success' => 'beginner',
+                        'warning' => 'intermediate',
+                        'danger' => 'advanced',
+                    ]),
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'success' => 'active',
                         'warning' => 'refunded',
                         'danger' => 'canceled',
                     ]),
+                Tables\Columns\TextColumn::make('completion')
+                    ->label('Progress')
+                    ->getStateUsing(fn ($record) => $record->getCompletionPercentage())
+                    ->formatStateUsing(fn ($state) => number_format($state, 1) . '%')
+                    ->badge()
+                    ->color(fn ($state): string => match (true) {
+                        $state >= 90 => 'success',
+                        $state >= 50 => 'warning',
+                        $state > 0 => 'info',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('paid_amount')
                     ->money('USD')
-                    ->sortable(),
+                    ->sortable()
+                    ->placeholder('Free'),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Enrolled At')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -65,11 +87,19 @@ class EnrollmentsRelationManager extends RelationManager
                         'refunded' => 'Refunded',
                         'canceled' => 'Canceled',
                     ]),
+                Tables\Filters\SelectFilter::make('course.level')
+                    ->label('Level')
+                    ->options([
+                        'beginner' => 'Beginner',
+                        'intermediate' => 'Intermediate',
+                        'advanced' => 'Advanced',
+                    ]),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -77,6 +107,7 @@ class EnrollmentsRelationManager extends RelationManager
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }

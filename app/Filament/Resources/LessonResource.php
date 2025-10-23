@@ -18,6 +18,9 @@ class LessonResource extends Resource
     protected static ?string $model = Lesson::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Content Management';
+    protected static ?int $navigationSort = 2;
+
 
     public static function form(Form $form): Form
     {
@@ -60,42 +63,47 @@ class LessonResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('order', 'asc')
+            ->reorderable('order')
             ->columns([
-                Tables\Columns\TextColumn::make('course_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('video_url')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('hls_manifest_url')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('duration_seconds')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('is_published')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('order')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Order')
+                    ->alignCenter()
+                    ->width(80),
+                Tables\Columns\TextColumn::make('course.title')
+                    ->label('Course')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30),
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Lesson Title')
+                    ->searchable()
+                    ->limit(40),
+                Tables\Columns\TextColumn::make('duration_seconds')
+                    ->label('Duration')
+                    ->formatStateUsing(fn ($state) => gmdate('H:i:s', $state))
+                    ->alignCenter(),
+                Tables\Columns\IconColumn::make('is_published')
+                    ->label('Published')
+                    ->boolean()
+                    ->alignCenter(),
                 Tables\Columns\IconColumn::make('is_free_preview')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Free Preview')
+                    ->boolean()
+                    ->alignCenter(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('course')
+                    ->relationship('course', 'title')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\TernaryFilter::make('is_published')
+                    ->label('Published')
+                    ->boolean(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -117,6 +125,7 @@ class LessonResource extends Resource
             'index' => Pages\ListLessons::route('/'),
             'create' => Pages\CreateLesson::route('/create'),
             'edit' => Pages\EditLesson::route('/{record}/edit'),
+            'reorder' => Pages\ReorderLessons::route('/reorder'),
         ];
     }
 }

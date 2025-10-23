@@ -9,12 +9,18 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 
 class LessonsRelationManager extends RelationManager
 {
     protected static string $relationship = 'lessons';
 
     protected static ?string $recordTitleAttribute = 'title';
+    
+    public function isTableReorderable(): bool
+    {
+        return true;
+    }
 
     public function form(Form $form): Form
     {
@@ -57,48 +63,74 @@ class LessonsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('title')
+            ->reorderable('order')
+            ->defaultSort('order', 'asc')
+            ->paginated(false)
             ->columns([
                 Tables\Columns\TextColumn::make('order')
-                    ->sortable()
-                    ->width(60),
+                    ->label('Order')
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->sortable()
+                    ->label('Lesson Title')
                     ->limit(50),
                 Tables\Columns\TextColumn::make('duration_seconds')
                     ->formatStateUsing(fn ($state) => gmdate('H:i:s', $state))
-                    ->sortable(),
+                    ->label('Duration')
+                    ->alignCenter(),
                 Tables\Columns\IconColumn::make('is_published')
                     ->boolean()
-                    ->sortable(),
+                    ->label('Published')
+                    ->alignCenter(),
                 Tables\Columns\IconColumn::make('is_free_preview')
                     ->boolean()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Tables\Filters\TernaryFilter::make('is_published')
-                    ->label('Published')
-                    ->boolean(),
-                Tables\Filters\TernaryFilter::make('is_free_preview')
                     ->label('Free Preview')
-                    ->boolean(),
+                    ->alignCenter(),
             ])
+            ->filters([])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
+                Tables\Actions\Action::make('moveUp')
+                    ->icon('heroicon-o-arrow-up')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $previous = \App\Models\Lesson::where('course_id', $record->course_id)
+                            ->where('order', '<', $record->order)
+                            ->orderBy('order', 'desc')
+                            ->first();
+                        
+                        if ($previous) {
+                            $temp = $record->order;
+                            $record->order = $previous->order;
+                            $previous->order = $temp;
+                            $record->save();
+                            $previous->save();
+                        }
+                    })
+                    ->visible(fn ($record) => \App\Models\Lesson::where('course_id', $record->course_id)
+                        ->where('order', '<', $record->order)->exists()),
+                Tables\Actions\Action::make('moveDown')
+                    ->icon('heroicon-o-arrow-down')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $next = \App\Models\Lesson::where('course_id', $record->course_id)
+                            ->where('order', '>', $record->order)
+                            ->orderBy('order', 'asc')
+                            ->first();
+                        
+                        if ($next) {
+                            $temp = $record->order;
+                            $record->order = $next->order;
+                            $next->order = $temp;
+                            $record->save();
+                            $next->save();
+                        }
+                    })
+                    ->visible(fn ($record) => \App\Models\Lesson::where('course_id', $record->course_id)
+                        ->where('order', '>', $record->order)->exists()),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
-            ->defaultSort('order');
+            ]);
     }
 }

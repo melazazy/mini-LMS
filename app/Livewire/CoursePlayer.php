@@ -44,7 +44,12 @@ class CoursePlayer extends Component
         $this->currentLesson = Lesson::with('course')->findOrFail($lessonId);
         $this->checkLessonAccess();
         $this->loadProgress();
-        $this->dispatch('lessonChanged');
+        
+        // Update browser URL
+        $this->redirect(route('courses.watch', [
+            'course' => $this->course->slug,
+            'lesson' => $lessonId
+        ]), navigate: true);
     }
 
     public function updateProgress($percentage, $position)
@@ -67,17 +72,55 @@ class CoursePlayer extends Component
             return;
         }
 
+        try {
+            $action = app(UpdateLessonProgressAction::class);
+            $action->execute(Auth::user(), $this->currentLesson, $percentage, $position);
+            
+            // Reload all lessons progress to update the sidebar
+            $this->loadAllLessonsProgress();
+            $this->loadProgress();
+            $this->dispatch('progressUpdated');
+        } catch (\Exception $e) {
+            \Log::error('Error updating progress: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Mark the current lesson as complete
+     * This triggers course completion logic if all lessons are completed
+     */
+    public function markAsComplete()
+    {
+        if (!Auth::check() || !$this->isEnrolled) {
+            return;
+        }
+
+        // Mark lesson as 100% complete with full duration
         $action = app(UpdateLessonProgressAction::class);
-        $action->execute(Auth::user(), $this->currentLesson, $percentage, $position);
+        $action->execute(
+            Auth::user(), 
+            $this->currentLesson, 
+            100, 
+            $this->currentLesson->duration_seconds ?? 0
+        );
         
+        // Reload progress to reflect completion
+        $this->loadAllLessonsProgress();
         $this->loadProgress();
+        
+        // Dispatch events
+        $this->dispatch('lessonCompleted');
         $this->dispatch('progressUpdated');
+        
+        // Show success message
+        session()->flash('success', 'Lesson marked as complete!');
     }
 
     public function nextLesson()
     {
-        $nextLesson = $this->course->publishedLessons()
+        $nextLesson = $this->course->publishedLessons
             ->where('order', '>', $this->currentLesson->order)
+            ->sortBy('order')
             ->first();
 
         if ($nextLesson) {
@@ -87,9 +130,9 @@ class CoursePlayer extends Component
 
     public function previousLesson()
     {
-        $previousLesson = $this->course->publishedLessons()
+        $previousLesson = $this->course->publishedLessons
             ->where('order', '<', $this->currentLesson->order)
-            ->orderBy('order', 'desc')
+            ->sortByDesc('order')
             ->first();
 
         if ($previousLesson) {
@@ -109,7 +152,14 @@ class CoursePlayer extends Component
 
     private function checkLessonAccess()
     {
-        $this->canWatchLesson = $this->currentLesson->is_free_preview || $this->isEnrolled;
+        // Free preview lessons are accessible to everyone (if published)
+        if ($this->currentLesson->is_free_preview && $this->currentLesson->is_published) {
+            $this->canWatchLesson = true;
+            return;
+        }
+        
+        // Other lessons require enrollment AND must be published
+        $this->canWatchLesson = $this->isEnrolled && $this->currentLesson->is_published;
     }
 
     private function loadProgress()
@@ -168,6 +218,48 @@ class CoursePlayer extends Component
         return $this->course->publishedLessons()
             ->where('order', '>', $this->currentLesson->order)
             ->exists();
+    }
+
+    /**
+     * Get the completion threshold from config
+     */
+    public function getCompletionThresholdProperty()
+    {
+        return config('lms.lesson_completion_threshold', 90);
+    }
+
+    /**
+     * Get the total number of lessons
+     */
+    public function getTotalLessonsProperty()
+    {
+        return $this->course->publishedLessons->count();
+    }
+
+    /**
+     * Get the number of completed lessons
+     */
+    public function getCompletedLessonsProperty()
+    {
+        if (!$this->isEnrolled || !Auth::check()) {
+            return 0;
+        }
+
+        return $this->lessonsProgress->filter(function($progress) {
+            return $progress->watched_percentage >= $this->completionThreshold;
+        })->count();
+    }
+
+    /**
+     * Get the overall course progress percentage
+     */
+    public function getProgressPercentageProperty()
+    {
+        if ($this->totalLessons === 0) {
+            return 0;
+        }
+
+        return round(($this->completedLessons / $this->totalLessons) * 100);
     }
 
     public function render()

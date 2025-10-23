@@ -78,7 +78,10 @@ class VideoPlayerIntegrationTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test('course-player', ['course' => $course]);
+        // Refresh course to load relationships
+        $course->refresh();
+
+        $component = Livewire::test('course-player', ['course' => $course, 'lesson' => $lesson]);
         
         // Verify user is enrolled
         $this->assertTrue($component->get('isEnrolled'));

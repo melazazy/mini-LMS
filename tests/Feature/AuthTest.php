@@ -1,226 +1,201 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Tests\TestCase;
 
-class AuthTest extends TestCase
-{
-    use RefreshDatabase;
+test('user can register as student', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test Student',
+        'email' => 'student@example.com',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'role' => 'student',
+    ]);
 
-    public function test_user_can_register_as_student()
-    {
-        $response = $this->post('/register', [
-            'name' => 'Test Student',
-            'email' => 'student@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-            'role' => 'student',
-        ]);
+    $response->assertRedirect('/dashboard');
+    $this->assertDatabaseHas('users', [
+        'email' => 'student@example.com',
+        'role' => 'student',
+    ]);
+    $this->assertAuthenticated();
+});
 
-        $response->assertRedirect('/dashboard');
-        $this->assertDatabaseHas('users', [
-            'email' => 'student@example.com',
-            'role' => 'student',
-        ]);
-        $this->assertAuthenticated();
-    }
+test('user can register as instructor', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test Instructor',
+        'email' => 'instructor@example.com',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'role' => 'instructor',
+    ]);
 
-    public function test_user_can_register_as_instructor()
-    {
-        $response = $this->post('/register', [
-            'name' => 'Test Instructor',
-            'email' => 'instructor@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-            'role' => 'instructor',
-        ]);
+    $response->assertRedirect('/dashboard');
+    $this->assertDatabaseHas('users', [
+        'email' => 'instructor@example.com',
+        'role' => 'instructor',
+    ]);
+    $this->assertAuthenticated();
+});
 
-        $response->assertRedirect('/dashboard');
-        $this->assertDatabaseHas('users', [
-            'email' => 'instructor@example.com',
-            'role' => 'instructor',
-        ]);
-        $this->assertAuthenticated();
-    }
+test('user cannot register with invalid role', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'user@example.com',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'role' => 'admin', // Admin role should not be allowed during registration
+    ]);
 
-    public function test_user_cannot_register_with_invalid_role()
-    {
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'user@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-            'role' => 'admin', // Admin role should not be allowed during registration
-        ]);
+    $response->assertSessionHasErrors(['role']);
+    $this->assertDatabaseMissing('users', [
+        'email' => 'user@example.com',
+    ]);
+});
 
-        $response->assertSessionHasErrors(['role']);
-        $this->assertDatabaseMissing('users', [
-            'email' => 'user@example.com',
-        ]);
-    }
+test('user can login with valid credentials', function () {
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('password123'),
+    ]);
 
-    public function test_user_can_login_with_valid_credentials()
-    {
-        $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-        ]);
+    $response = $this->post('/login', [
+        'email' => 'test@example.com',
+        'password' => 'password123',
+    ]);
 
-        $response = $this->post('/login', [
-            'email' => 'test@example.com',
-            'password' => 'password123',
-        ]);
+    $response->assertRedirect('/dashboard');
+    $this->assertAuthenticated();
+});
 
-        $response->assertRedirect('/dashboard');
-        $this->assertAuthenticated();
-    }
+test('user cannot login with invalid credentials', function () {
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('password123'),
+    ]);
 
-    public function test_user_cannot_login_with_invalid_credentials()
-    {
-        $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-        ]);
+    $response = $this->post('/login', [
+        'email' => 'test@example.com',
+        'password' => 'wrongpassword',
+    ]);
 
-        $response = $this->post('/login', [
-            'email' => 'test@example.com',
-            'password' => 'wrongpassword',
-        ]);
+    $response->assertSessionHasErrors(['email']);
+    $this->assertGuest();
+});
 
-        $response->assertSessionHasErrors(['email']);
-        $this->assertGuest();
-    }
+test('user can logout', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
 
-    public function test_user_can_logout()
-    {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+    $response = $this->post('/logout');
 
-        $response = $this->post('/logout');
+    $response->assertRedirect('/');
+    $this->assertGuest();
+});
 
-        $response->assertRedirect('/');
-        $this->assertGuest();
-    }
+test('guest cannot access protected routes', function () {
+    $response = $this->get('/dashboard');
+    $response->assertRedirect('/login');
+});
 
-    public function test_guest_cannot_access_protected_routes()
-    {
-        $response = $this->get('/dashboard');
-        $response->assertRedirect('/login');
-    }
+test('student cannot access instructor routes', function () {
+    $student = User::factory()->create(['role' => 'student']);
+    $this->actingAs($student);
 
-    public function test_student_cannot_access_instructor_routes()
-    {
-        $student = User::factory()->create(['role' => 'student']);
-        $this->actingAs($student);
+    $response = $this->get('/instructor/courses');
+    $response->assertStatus(403);
+});
 
-        $response = $this->get('/instructor/courses');
-        $response->assertStatus(403);
-    }
+test('instructor can access instructor routes', function () {
+    $instructor = User::factory()->create(['role' => 'instructor']);
+    $this->actingAs($instructor);
 
-    public function test_instructor_can_access_instructor_routes()
-    {
-        $instructor = User::factory()->create(['role' => 'instructor']);
-        $this->actingAs($instructor);
+    $response = $this->get('/instructor/courses');
+    $response->assertStatus(200);
+});
 
-        $response = $this->get('/instructor/courses');
-        $response->assertStatus(200);
-    }
+test('admin can access instructor routes', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $this->actingAs($admin);
 
-    public function test_admin_can_access_instructor_routes()
-    {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $this->actingAs($admin);
+    $response = $this->get('/instructor/courses');
+    $response->assertStatus(200);
+});
 
-        $response = $this->get('/instructor/courses');
-        $response->assertStatus(200);
-    }
+test('password reset request form is accessible', function () {
+    $response = $this->get('/password/reset');
+    $response->assertStatus(200);
+});
 
-    public function test_password_reset_request_form_is_accessible()
-    {
-        $response = $this->get('/password/reset');
-        $response->assertStatus(200);
-    }
+test('password reset link can be requested', function () {
+    $user = User::factory()->create();
 
-    public function test_password_reset_link_can_be_requested()
-    {
-        $user = User::factory()->create();
+    $response = $this->post('/password/email', [
+        'email' => $user->email,
+    ]);
 
-        $response = $this->post('/password/email', [
-            'email' => $user->email,
-        ]);
+    $response->assertSessionHas('status');
+});
 
-        $response->assertSessionHas('status');
-    }
+test('user role methods work correctly', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $instructor = User::factory()->create(['role' => 'instructor']);
+    $student = User::factory()->create(['role' => 'student']);
 
-    public function test_user_role_methods_work_correctly()
-    {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $instructor = User::factory()->create(['role' => 'instructor']);
-        $student = User::factory()->create(['role' => 'student']);
+    // Test isAdmin method
+    expect($admin->isAdmin())->toBeTrue();
+    expect($instructor->isAdmin())->toBeFalse();
+    expect($student->isAdmin())->toBeFalse();
 
-        // Test isAdmin method
-        $this->assertTrue($admin->isAdmin());
-        $this->assertFalse($instructor->isAdmin());
-        $this->assertFalse($student->isAdmin());
+    // Test isInstructor method
+    expect($admin->isInstructor())->toBeFalse();
+    expect($instructor->isInstructor())->toBeTrue();
+    expect($student->isInstructor())->toBeFalse();
 
-        // Test isInstructor method
-        $this->assertFalse($admin->isInstructor());
-        $this->assertTrue($instructor->isInstructor());
-        $this->assertFalse($student->isInstructor());
+    // Test isStudent method
+    expect($admin->isStudent())->toBeFalse();
+    expect($instructor->isStudent())->toBeFalse();
+    expect($student->isStudent())->toBeTrue();
 
-        // Test isStudent method
-        $this->assertFalse($admin->isStudent());
-        $this->assertFalse($instructor->isStudent());
-        $this->assertTrue($student->isStudent());
+    // Test canManageContent method
+    expect($admin->canManageContent())->toBeTrue();
+    expect($instructor->canManageContent())->toBeTrue();
+    expect($student->canManageContent())->toBeFalse();
+});
 
-        // Test canManageContent method
-        $this->assertTrue($admin->canManageContent());
-        $this->assertTrue($instructor->canManageContent());
-        $this->assertFalse($student->canManageContent());
-    }
+test('registration form is accessible', function () {
+    $response = $this->get('/register');
+    $response->assertStatus(200);
+});
 
-    public function test_registration_form_is_accessible()
-    {
-        $response = $this->get('/register');
-        $response->assertStatus(200);
-    }
+test('login form is accessible', function () {
+    $response = $this->get('/login');
+    $response->assertStatus(200);
+});
 
-    public function test_login_form_is_accessible()
-    {
-        $response = $this->get('/login');
-        $response->assertStatus(200);
-    }
+test('authenticated user can access dashboard', function () {
+    $user = User::factory()->student()->create();
+    $this->actingAs($user);
 
-    public function test_authenticated_user_can_access_dashboard()
-    {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+    $response = $this->get('/dashboard');
+    // Dashboard redirects to role-specific dashboard
+    $response->assertRedirect(route('student.dashboard'));
+});
 
-        $response = $this->get('/dashboard');
-        $response->assertStatus(200);
-    }
+test('remember me functionality', function () {
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('password123'),
+    ]);
 
-    public function test_remember_me_functionality()
-    {
-        $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-        ]);
+    $response = $this->post('/login', [
+        'email' => 'test@example.com',
+        'password' => 'password123',
+        'remember' => true,
+    ]);
 
-        $response = $this->post('/login', [
-            'email' => 'test@example.com',
-            'password' => 'password123',
-            'remember' => true,
-        ]);
-
-        $response->assertRedirect('/dashboard');
-        $this->assertAuthenticated();
-        
-        // Check if remember token is set
-        $this->assertNotNull($user->fresh()->remember_token);
-    }
-}
+    $response->assertRedirect('/dashboard');
+    $this->assertAuthenticated();
+    
+    // Check if remember token is set
+    expect($user->fresh()->remember_token)->not->toBeNull();
+});

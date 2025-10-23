@@ -27,17 +27,60 @@ class EnrollmentsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('course_id')
+            ->recordTitleAttribute('user.name')
             ->columns([
-                Tables\Columns\TextColumn::make('course_id'),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Student')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('user.email')
+                    ->label('Email')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\BadgeColumn::make('status')
+                    ->colors([
+                        'success' => 'active',
+                        'warning' => 'refunded',
+                        'danger' => 'canceled',
+                    ]),
+                Tables\Columns\TextColumn::make('completion')
+                    ->label('Progress')
+                    ->getStateUsing(fn ($record) => $record->getCompletionPercentage())
+                    ->formatStateUsing(fn ($state) => number_format($state, 1) . '%')
+                    ->badge()
+                    ->color(fn ($state): string => match (true) {
+                        $state >= 90 => 'success',
+                        $state >= 50 => 'warning',
+                        $state > 0 => 'info',
+                        default => 'gray',
+                    })
+                    ->sortable(query: function ($query, string $direction) {
+                        // This is a computed column, so we can't sort directly
+                        // For now, we'll skip sorting or implement a custom solution
+                        return $query;
+                    }),
+                Tables\Columns\TextColumn::make('paid_amount')
+                    ->money('USD')
+                    ->sortable()
+                    ->placeholder('Free'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Enrolled At')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'refunded' => 'Refunded',
+                        'canceled' => 'Canceled',
+                    ]),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -45,6 +88,7 @@ class EnrollmentsRelationManager extends RelationManager
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }
