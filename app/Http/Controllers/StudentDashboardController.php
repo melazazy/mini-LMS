@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certificate;
 use App\Models\Enrollment;
 use App\Models\LessonProgress;
 use App\Models\CourseCompletion;
@@ -76,6 +77,28 @@ class StudentDashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('dashboards.student', compact('enrollments', 'stats', 'continueWatching', 'completedCourses'));
+        // Get student's certificates
+        $certificates = Certificate::where('user_id', $user->id)
+            ->with(['course', 'enrollment'])
+            ->latest()
+            ->get();
+
+        // Separate certificates by status
+        $approvedCertificates = $certificates->where('status', 'approved');
+        $pendingCertificates = $certificates->where('status', 'pending');
+
+        // Certificate statistics
+        $stats['total_certificates'] = $approvedCertificates->count();
+        $stats['pending_certificates'] = $pendingCertificates->count();
+
+        return view('dashboards.student', compact(
+            'enrollments', 
+            'stats', 
+            'continueWatching', 
+            'completedCourses',
+            'certificates',
+            'approvedCertificates',
+            'pendingCertificates'
+        ));
     }
 }

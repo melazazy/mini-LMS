@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstructorDashboardController;
@@ -17,6 +18,12 @@ Route::get('/', [CourseController::class, 'index'])->name('home');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 Route::get('/courses/{course}/watch/{lesson?}', [CourseController::class, 'watch'])->name('courses.watch')->whereNumber('lesson');
+
+// Public certificate verification
+Route::get('/certificates/verify/{hash}', [CertificateController::class, 'verify'])->name('certificates.verify');
+
+// Demo certificate (for testing layout)
+Route::get('/certificates/demo', [CertificateController::class, 'demo'])->name('certificates.demo');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
@@ -55,6 +62,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/courses/{course}/lessons/{lesson}', [LessonController::class, 'show'])->name('lessons.show');
     Route::post('/lessons/{lesson}/progress', [LessonController::class, 'updateProgress'])->name('lessons.progress')
         ->middleware('role:student');
+    
+    // Certificate routes
+    Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])
+        ->name('certificates.download')
+        ->defaults('format', 'pdf');
     
     // Instructor routes
     Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('instructor.')->group(function () {

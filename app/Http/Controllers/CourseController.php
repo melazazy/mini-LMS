@@ -37,7 +37,7 @@ class CourseController extends Controller
         return view('courses.show', compact('course'));
     }
     
-    public function watch(Course $course, Lesson $lesson = null)
+    public function watch(Course $course, ?Lesson $lesson = null)
     {
         // Ensure course is published
         if (!$course->is_published) {

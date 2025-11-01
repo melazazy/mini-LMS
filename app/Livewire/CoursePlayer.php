@@ -19,7 +19,7 @@ class CoursePlayer extends Component
 
     protected $listeners = ['lessonSelected' => 'loadLesson'];
 
-    public function mount(Course $course, Lesson $lesson = null)
+    public function mount(Course $course, ?Lesson $lesson = null)
     {
         $this->course = $course->load('publishedLessons');
         $this->currentLesson = $lesson ?? $course->publishedLessons()->first();

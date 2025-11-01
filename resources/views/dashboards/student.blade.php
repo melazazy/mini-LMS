@@ -4,7 +4,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                 <!-- Active Courses -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg transition-colors duration-200">
                     <div class="p-6">
@@ -34,6 +34,23 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
                                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $stats['completed_courses'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificates -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg transition-colors duration-200">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Certificates</p>
+                                <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $stats['total_certificates'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -73,6 +90,115 @@
                     </div>
                 </div>
             </div>
+
+            <!-- My Certificates -->
+            @if($approvedCertificates->count() > 0 || $pendingCertificates->count() > 0)
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-8 transition-colors duration-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                                <svg class="h-6 w-6 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                </svg>
+                                My Certificates
+                            </h3>
+                            @if($pendingCertificates->count() > 0)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    {{ $pendingCertificates->count() }} Pending Approval
+                                </span>
+                            @endif
+                        </div>
+
+                        <!-- Approved Certificates -->
+                        @if($approvedCertificates->count() > 0)
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                @foreach($approvedCertificates as $certificate)
+                                    <div class="border-2 border-yellow-200 dark:border-yellow-700 rounded-lg overflow-hidden hover:shadow-xl transition-all bg-gradient-to-br from-yellow-50 to-white dark:from-gray-800 dark:to-gray-800">
+                                        <div class="p-6">
+                                            <div class="flex items-start justify-between mb-4">
+                                                <div class="flex-shrink-0 bg-yellow-500 rounded-full p-3">
+                                                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                                    </svg>
+                                                </div>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    Verified
+                                                </span>
+                                            </div>
+                                            
+                                            <h4 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">{{ $certificate->course->title }}</h4>
+                                            
+                                            <div class="space-y-2 mb-4">
+                                                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                                    </svg>
+                                                    <span class="font-mono text-xs">{{ $certificate->certificate_number }}</span>
+                                                </div>
+                                                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    {{ $certificate->issued_at->format('M d, Y') }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex space-x-2">
+                                                <a href="{{ route('certificates.download', ['certificate' => $certificate->id, 'format' => 'pdf']) }}" 
+                                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                                    <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                    </svg>
+                                                    Download
+                                                </a>
+                                                <a href="{{ $certificate->verification_url }}" 
+                                                   target="_blank"
+                                                   class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <!-- Pending Certificates -->
+                        @if($pendingCertificates->count() > 0)
+                            <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+                                    <svg class="h-5 w-5 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Pending Approval
+                                </h4>
+                                <div class="space-y-3">
+                                    @foreach($pendingCertificates as $certificate)
+                                        <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-gray-700 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <svg class="h-6 w-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $certificate->course->title }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Requested {{ $certificate->created_at->diffForHumans() }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                Pending
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             <!-- Continue Watching -->
             @if($continueWatching->count() > 0)

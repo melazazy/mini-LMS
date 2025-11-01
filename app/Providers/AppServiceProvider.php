@@ -47,5 +47,8 @@ class AppServiceProvider extends ServiceProvider
             CourseCompleted::class,
             SendCourseCompletionNotification::class,
         );
+
+        // CertificateIssued listener is auto-discovered by Laravel
+        // Removed manual registration to prevent duplicate emails
     }
 }

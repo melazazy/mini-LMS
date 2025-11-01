@@ -33,6 +33,11 @@ class Enrollment extends Model
         return $this->belongsTo(Course::class);
     }
 
+    public function certificate()
+    {
+        return $this->hasOne(Certificate::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

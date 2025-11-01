@@ -123,6 +123,11 @@ class Course extends Model
         return $this->morphOne(ModerationReview::class, 'subject');
     }
 
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
     // Scopes
     public function scopePublished($query)
     {

@@ -105,6 +105,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(PushSubscription::class);
     }
 
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function approvedCertificates()
+    {
+        return $this->hasMany(Certificate::class)->where('status', 'approved');
+    }
+
     /**
      * Route notifications for the WebPush channel.
      *
